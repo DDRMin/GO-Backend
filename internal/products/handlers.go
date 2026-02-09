@@ -4,8 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/DDRMin/GO-Backend/internal/products"
 )
+
+type Product struct {
+	ID    int     `json:"id"`
+	Name  string  `json:"name"`
+	Price float64 `json:"price"`
+}
 
 type handler struct {
 	service Service
@@ -18,7 +23,7 @@ func NewHandler(service Service) *handler {
 }
 
 func (h *handler) ListProducts(w http.ResponseWriter, r *http.Request) {
-	products := []products.Product{
+	products := []Product{
 		{ID: 1, Name: "Product 1", Price: 10.0},
 		{ID: 2, Name: "Product 2", Price: 20.0},
 	}
