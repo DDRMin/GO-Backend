@@ -4,4 +4,4 @@ ORDER BY name;
 
 -- name: FindProductByID :one
 SELECT * FROM products
-WHERE id = ? LIMIT 1;
+WHERE id = $1;

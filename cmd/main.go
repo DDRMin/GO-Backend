@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"os"
+	"github.com/DDRMin/GO-Backend/internal/env"
 )
 
 
@@ -10,7 +11,7 @@ func main() {
 	config := config{
 		addr: ":8080",
 		db: dbConfig{
-			dbUrl: "postgres://	user:password@localhost:5432/mydb",
+			dbUrl: env.GetString("DB_URL", "postgres://user:password@localhost:5432/mydb?sslmode=disable"),
 		},
 	}
 

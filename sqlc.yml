@@ -1,10 +1,12 @@
 version: "2"
 sql:
-  - engine: "mysql"
+  - engine: "postgresql"
     queries: "./internal/adapters/sqlc/queries.sql"
     schema: "./internal/adapters/migrations/schema.sql"
     gen:
       go:
         package: "repo"
+        sql_package: "pgx/v5"
         out: "./internal/adapters/sqlc"
         emit_json_tags: true
+        emit_interface: true
