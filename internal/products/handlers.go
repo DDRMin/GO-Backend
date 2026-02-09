@@ -1,16 +1,10 @@
 package products
 
 import (
-	"encoding/json"
 	"net/http"
 
+	"github.com/DDRMin/GO-Backend/internal/json"
 )
-
-type Product struct {
-	ID    int     `json:"id"`
-	Name  string  `json:"name"`
-	Price float64 `json:"price"`
-}
 
 type handler struct {
 	service Service
@@ -23,11 +17,17 @@ func NewHandler(service Service) *handler {
 }
 
 func (h *handler) ListProducts(w http.ResponseWriter, r *http.Request) {
-	products := []Product{
-		{ID: 1, Name: "Product 1", Price: 10.0},
-		{ID: 2, Name: "Product 2", Price: 20.0},
+
+	err := h.service.ListProducts(r.Context())
+	if err != nil {
+		json.Write(w, http.StatusInternalServerError, map[string]string{"error": "failed to list products"})
+		return
 	}
 
-	json.NewEncoder(w).Encode(products)
+	products := struct {
+		Products []string `json:"products"`
+	}{}	
+
+	json.Write(w, http.StatusOK, products)
 
 }

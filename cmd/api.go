@@ -26,7 +26,8 @@ func (app *API) mount() http.Handler {
 		w.Write([]byte("root."))
 	})
 
-	productsHandler := products.NewHandler(nil)
+	productService := products.NewService()
+	productsHandler := products.NewHandler(productService)
 	router.Get("/products", productsHandler.ListProducts)
 
 	return router
