@@ -1,0 +1,5 @@
+CREATE TABLE products (
+  id   BIGINT  NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name text    NOT NULL,
+  price  DECIMAL(10, 2) NOT NULL
+);
