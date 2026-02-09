@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/DDRMin/GO-Backend/internal/products"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -24,6 +25,9 @@ func (app *API) mount() http.Handler {
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("root."))
 	})
+
+	productsHandler := products.NewHandler(nil)
+	router.Get("/products", productsHandler.ListProducts)
 
 	return router
 }
