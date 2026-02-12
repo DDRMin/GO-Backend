@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	repo "github.com/DDRMin/GO-Backend/internal/adapters/sqlc"
 	"github.com/DDRMin/GO-Backend/internal/products"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -30,7 +31,7 @@ func (app *API) mount() http.Handler {
 
 	router.Get("/health", app.healthCheck)
 
-	productService := products.NewService()
+	productService := products.NewService(repo.New(app.pool))
 	productsHandler := products.NewHandler(productService)
 	router.Get("/products", productsHandler.ListProducts)
 
