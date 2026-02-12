@@ -1,3 +1,6 @@
+-- This file is used by sqlc to generate Go code.
+-- Keep in sync with schema.hcl (the Atlas source of truth).
+
 CREATE TABLE IF NOT EXISTS products (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   name text    NOT NULL,

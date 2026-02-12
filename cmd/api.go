@@ -1,30 +1,34 @@
 package main
 
 import (
-	"log"
+	"context"
+	"errors"
+	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/DDRMin/GO-Backend/internal/products"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+const shutdownTimeout = 30 * time.Second
 
 type API struct {
 	config config
+	pool   *pgxpool.Pool
 }
 
 func (app *API) mount() http.Handler {
 	router := chi.NewRouter()
-	router.Use(middleware.RequestID) 
+	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Timeout(60 * time.Second))
 
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("root."))
-	})
+	router.Get("/health", app.healthCheck)
 
 	productService := products.NewService()
 	productsHandler := products.NewHandler(productService)
@@ -33,18 +37,53 @@ func (app *API) mount() http.Handler {
 	return router
 }
 
-func (app *API) run(h http.Handler) error {
+func (app *API) run(ctx context.Context, h http.Handler) error {
 	server := &http.Server{
-		Addr:    app.config.addr,
-		Handler: h,
+		Addr:         app.config.addr,
+		Handler:      h,
 		WriteTimeout: time.Second * 30,
-		ReadTimeout:  time.Second * 30,
+		ReadTimeout:  time.Second * 10,
 		IdleTimeout:  time.Minute,
 	}
 
-	log.Printf("Starting server on %s", app.config.addr)
+	slog.Info("Server starting", "addr", app.config.addr)
 
-	return server.ListenAndServe()
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- server.ListenAndServe()
+	}()
+
+	select {
+	case <-ctx.Done():
+		slog.Info("Shutdown signal received, draining connections...")
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			slog.Error("Forced shutdown", "error", err)
+			return err
+		}
+
+		slog.Info("Server stopped gracefully")
+		return nil
+
+	case err := <-errCh:
+		if errors.Is(err, http.ErrServerClosed) {
+			return nil
+		}
+		return err
+	}
+}
+
+func (app *API) healthCheck(w http.ResponseWriter, r *http.Request) {
+	if err := app.pool.Ping(r.Context()); err != nil {
+		slog.Error("Health check failed", "error", err)
+		http.Error(w, "unhealthy", http.StatusServiceUnavailable)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
 }
 
 type config struct {
