@@ -1,82 +1,135 @@
-<div align="center">
-
 # GO-Backend Service
 
 Minimal Go HTTP API starter with Chi, PostgreSQL, Atlas migrations, and sqlc code generation.
 
-</div>
-
 ## Overview
 
-- Lightweight API server built with Chi, `pgx`, and Go 1.25.5.
-- Connects to PostgreSQL via `DB_URL` (defaults to a local connection) and pings the DB on `/health`.
-- Database schema managed with Atlas from `internal/adapters/migrations/schema.hcl`; `schema.sql` stays in sync for sqlc.
-- Product domain stub with request logging, timeouts, and structured logging via `slog`.
-- sqlc-backed queries for `products` (currently unused in the handler).
+This project is a lightweight API server built with Go 1.25.5, designed to be simple yet robust. Key features include:
 
-## Project Layout
+-   **Router**: `chi` v5 for fast and composable routing.
+-   **Database**: `pgx` v5 for high-performance PostgreSQL driver and connection pooling.
+-   **Migrations**: Managed by [Atlas](https://atlasgo.io) for declarative schema management (`internal/adapters/migrations/schema.hcl`).
+-   **Code Generation**: [sqlc](https://sqlc.dev) for type-safe SQL queries (`internal/adapters/sqlc`).
+-   **Logging**: Structured logging using Go's standard library `slog`.
+-   **Task Runner**: `Taskfile.yml` for simplified command execution.
 
-- `cmd/` – application entrypoint (`main.go`) and router wiring (`api.go`).
-- `internal/products/` – product handler and service (returns an empty list placeholder).
-- `internal/adapters/sqlc/` – sqlc queries and generated code for `products`.
-- `internal/adapters/migrations/` – Atlas schema (`schema.hcl`) and companion `schema.sql` for sqlc alignment.
-- `internal/env/` – environment variable helpers.
-- `internal/json/` – JSON response helper.
-
-## Quick Start
-
-1) **Prerequisites**
-	- Go 1.25.5+
-	- PostgreSQL
-	- Atlas CLI (`brew install ariga/tap/atlas` or download from ariga.io)
-	- Optional: `sqlc` for regenerating query code
-
-2) **Environment**
-	Set the database URL or rely on the default:
-
-	```bash
-	set DB_URL=postgres://user:password@localhost:5432/mydb?sslmode=disable   # PowerShell: $env:DB_URL="..."
-	```
-
-3) **Install dependencies**
-	```bash
-	go mod tidy
-	```
-
-4) **Apply the schema with Atlas**
-	```bash
-	atlas schema apply --env local
-	```
-	The `local` env in `atlas.hcl` reads `DB_URL`, formats and plans against the dev container image (`postgres:17`), then applies the plan to your database.
-
-5) **Run the API**
-	```bash
-	go run ./cmd
-	```
-	The server listens on `:8080`.
-
-## API
-
-- `GET /health` – pings the database connection pool; returns `503` if unreachable.
-- `GET /products` – returns an empty `products` array placeholder.
-
-## Database (Atlas)
-
-- Schema source of truth: `internal/adapters/migrations/schema.hcl` (referenced by `atlas.hcl`).
-- Apply changes: `atlas schema apply --env local`.
-- Inspect current DB: `atlas schema inspect -u "$env:DB_URL"` (PowerShell) or `atlas schema inspect -u "$DB_URL"` (bash).
-- Keep `schema.sql` aligned with `schema.hcl` for sqlc (see comment inside the file).
-
-## sqlc
-
-Generate query interfaces and models from `internal/adapters/sqlc/queries.sql`:
+## Project Structure
 
 ```bash
-sqlc generate
+.
+├── cmd/                # Application entrypoints
+│   ├── main.go         # Service entrypoint
+│   └── api.go          # HTTP server and router setup
+├── internal/
+│   ├── adapters/       # Interface adapters (database, migrations)
+│   │   ├── migrations/ # Atlas schema definition (schema.hcl) and SQL dump (schema.sql)
+│   │   └── sqlc/       # sqlc generated Go code and SQL queries
+│   ├── env/            # Environment variable utilities
+│   ├── json/           # JSON response helpers
+│   └── products/       # Domain logic for product management
+├── atlas.hcl           # Atlas configuration file
+├── sqlc.yml            # sqlc configuration file
+└── Taskfile.yml        # Task runner definitions
 ```
 
-## Local Development Tips
+## Prerequisites
 
-- Logging: structured logs via `slog` print to stdout.
-- Timeouts: Chi middleware sets a 60s request timeout; HTTP server uses 30s read/write timeouts.
-- Testing: run `go test ./...` once tests are added.
+Ensure you have the following installed:
+
+-   **Go**: 1.25.5 or higher
+-   **PostgreSQL**: 16 or higher (or Docker)
+-   **Atlas CLI**: For managing database schemas
+    -   MacOS: `brew install ariga/tap/atlas`
+    -   Windows/Linux: Download from [ariga.io](https://atlasgo.io/getting-started)
+-   **Task**: (Optional) For running `Taskfile.yml` commands. Install via [taskfile.dev](https://taskfile.dev/installation/).
+-   **sqlc**: (Optional) For regenerating database code. Install via [sqlc.dev](https://docs.sqlc.dev/en/latest/overview/install.html).
+
+## Getting Started
+
+1.  **Clone the repository**
+
+    ```bash
+    git clone https://github.com/DDRMin/GO-Backend.git
+    cd GO-Backend
+    ```
+
+2.  **Environment Setup**
+
+    Configure your database connection string. You can set the `DB_URL` environment variable or use a `.env` file if you implement one.
+
+    **Windows (PowerShell):**
+    ```powershell
+    $env:DB_URL="postgres://user:password@localhost:5432/mydb?sslmode=disable"
+    ```
+
+    **Mac/Linux:**
+    ```bash
+    export DB_URL="postgres://user:password@localhost:5432/mydb?sslmode=disable"
+    ```
+
+3.  **Install Dependencies**
+
+    ```bash
+    go mod tidy
+    ```
+
+4.  **Database Setup (Atlas)**
+
+    Apply the database schema defined in `internal/adapters/migrations/schema.hcl`.
+
+    ```bash
+    # Using Taskfile (Recommended)
+    task atlas-apply
+
+    # Manual command
+    atlas schema apply --env local
+    ```
+
+    This command reads `DB_URL`, compares the declarative schema with the database state, and applies necessary changes.
+
+5.  **Run the Application**
+
+    ```bash
+    go run ./cmd
+    ```
+
+    The server will start on port `8080` (default).
+
+## Development Workflow
+
+### Database Schema Changes
+
+1.  Modify `internal/adapters/migrations/schema.hcl`.
+2.  Apply changes to your local database:
+    ```bash
+    task atlas-apply
+    ```
+    This also updates `internal/adapters/migrations/schema.sql` which serves as the source of truth for `sqlc`.
+
+### Generating SQL Code
+
+If you add or modify SQL queries in `internal/adapters/sqlc/queries.sql`:
+
+1.  Run the generator:
+    ```bash
+    task sqlc
+    # OR
+    sqlc generate
+    ```
+2.  Use the generated methods in your Go code (see `internal/products/service.go` for examples).
+
+## API Endpoints
+
+| Method | Endpoint    | Description                                      |
+| :----- | :---------- | :----------------------------------------------- |
+| `GET`  | `/health`   | Health check. Returns 200 OK or 503 Unavailable. |
+| `GET`  | `/products` | Retreives a list of products.                    |
+
+## Configuration
+
+The application is configured via environment variables:
+
+| Variable | Description                                             | Default     |
+| :------- | :------------------------------------------------------ | :---------- |
+| `DB_URL` | PostgreSQL connection string                            | (Required)  |
+| `PORT`   | Port for the HTTP server (if configured in `config.go`) | `:8080`     |
