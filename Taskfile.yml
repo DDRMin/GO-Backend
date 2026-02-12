@@ -1,0 +1,35 @@
+version: '3'
+
+vars:
+  ATLAS: '{{ default "atlas" (env "ATLAS") }}'
+  SQLC: '{{ default "sqlc" (env "SQLC") }}'
+  ATLAS_ENV: '{{ default "local" (env "ATLAS_ENV") }}'
+  SCHEMA_HCL: '{{ default "internal/adapters/migrations/schema.hcl" (env "SCHEMA_HCL") }}'
+  SCHEMA_SQL: '{{ default "internal/adapters/migrations/schema.sql" (env "SCHEMA_SQL") }}'
+  FORMAT_SQL: '{{`{{ sql . }}`}}'
+
+tasks:
+  default:
+    cmds:
+      - task: gen
+
+  gen:
+    cmds:
+      - task: atlas-apply
+      - task: schema
+      - task: sqlc
+
+  atlas-apply:
+    desc: Apply schema.hcl to the database via Atlas
+    cmds:
+      - '{{.ATLAS}} schema apply --env {{.ATLAS_ENV}} --to "file://{{.SCHEMA_HCL}}" --auto-approve'
+
+  schema:
+    desc: Inspect live DB and write schema.sql
+    cmds:
+      - '{{.ATLAS}} schema inspect --env {{.ATLAS_ENV}} --format "{{.FORMAT_SQL}}" > {{.SCHEMA_SQL}}'
+
+  sqlc:
+    desc: Generate Go code from queries
+    cmds:
+      - '{{.SQLC}} generate'
