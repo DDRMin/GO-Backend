@@ -19,7 +19,7 @@ func main() {
 	slog.SetDefault(logger)
 
 	config := config{
-		addr: ":8080",
+		addr: "127.0.0.1:8080",
 		db: dbConfig{
 			dbUrl: env.GetString("DB_URL", "postgres://user:password@localhost:5432/mydb?sslmode=disable"),
 		},

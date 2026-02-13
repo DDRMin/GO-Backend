@@ -3,8 +3,10 @@ package products
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/DDRMin/GO-Backend/internal/json"
+	"github.com/go-chi/chi/v5"
 )
 
 type handler struct {
@@ -28,4 +30,23 @@ func (h *handler) ListProducts(w http.ResponseWriter, r *http.Request) {
 
 	json.Write(w, http.StatusOK, products)
 
+}
+
+func (h *handler) GetProduct(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	intID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
+
+	product, err := h.service.FindProductByID(r.Context(), intID)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Failed to find product", http.StatusInternalServerError)
+		return
+	}
+
+	json.Write(w, http.StatusOK, product)
 }
