@@ -9,6 +9,8 @@ import (
 )
 
 type Querier interface {
+	CreateOrder(ctx context.Context, arg CreateOrderParams) error
+	CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) error
 	FindProductByID(ctx context.Context, id int64) (Product, error)
 	ListProducts(ctx context.Context) ([]Product, error)
 }

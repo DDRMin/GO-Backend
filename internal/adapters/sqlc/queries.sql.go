@@ -7,7 +7,41 @@ package repo
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createOrder = `-- name: CreateOrder :exec
+INSERT INTO orders (user_id, created_at)
+VALUES ($1, $2)
+RETURNING id
+`
+
+type CreateOrderParams struct {
+	UserID    int64              `json:"user_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) error {
+	_, err := q.db.Exec(ctx, createOrder, arg.UserID, arg.CreatedAt)
+	return err
+}
+
+const createOrderItem = `-- name: CreateOrderItem :exec
+INSERT INTO order_items (order_id, product_id, quantity)
+VALUES ($1, $2, $3)
+`
+
+type CreateOrderItemParams struct {
+	OrderID   int64 `json:"order_id"`
+	ProductID int64 `json:"product_id"`
+	Quantity  int32 `json:"quantity"`
+}
+
+func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) error {
+	_, err := q.db.Exec(ctx, createOrderItem, arg.OrderID, arg.ProductID, arg.Quantity)
+	return err
+}
 
 const findProductByID = `-- name: FindProductByID :one
 SELECT id, name, price, quantity, created_at FROM products
