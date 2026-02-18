@@ -6,11 +6,16 @@ ORDER BY name;
 SELECT * FROM products
 WHERE id = $1;
 
+-- name: CreateProduct :one
+INSERT INTO products (name, price, quantity, created_at)  
+VALUES ($1, $2, $3, NOW())
+RETURNING id;
+
 -- name: CreateOrderItem :exec
 INSERT INTO order_items (order_id, product_id, quantity)
 VALUES ($1, $2, $3);
 
--- name: CreateOrder :exec
+-- name: CreateOrder :one
 INSERT INTO orders (user_id, created_at)
-VALUES ($1, $2)
+VALUES ($1, NOW())
 RETURNING id; 

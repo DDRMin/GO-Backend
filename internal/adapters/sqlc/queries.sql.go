@@ -11,20 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createOrder = `-- name: CreateOrder :exec
+const createOrder = `-- name: CreateOrder :one
 INSERT INTO orders (user_id, created_at)
-VALUES ($1, $2)
+VALUES ($1, NOW())
 RETURNING id
 `
 
-type CreateOrderParams struct {
-	UserID    int64              `json:"user_id"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-}
-
-func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) error {
-	_, err := q.db.Exec(ctx, createOrder, arg.UserID, arg.CreatedAt)
-	return err
+func (q *Queries) CreateOrder(ctx context.Context, userID int64) (int64, error) {
+	row := q.db.QueryRow(ctx, createOrder, userID)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }
 
 const createOrderItem = `-- name: CreateOrderItem :exec
@@ -41,6 +38,25 @@ type CreateOrderItemParams struct {
 func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) error {
 	_, err := q.db.Exec(ctx, createOrderItem, arg.OrderID, arg.ProductID, arg.Quantity)
 	return err
+}
+
+const createProduct = `-- name: CreateProduct :one
+INSERT INTO products (name, price, quantity, created_at)  
+VALUES ($1, $2, $3, NOW())
+RETURNING id
+`
+
+type CreateProductParams struct {
+	Name     string         `json:"name"`
+	Price    pgtype.Numeric `json:"price"`
+	Quantity int32          `json:"quantity"`
+}
+
+func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createProduct, arg.Name, arg.Price, arg.Quantity)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }
 
 const findProductByID = `-- name: FindProductByID :one

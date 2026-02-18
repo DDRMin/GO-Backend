@@ -35,6 +35,7 @@ func (app *API) mount() http.Handler {
 	productsHandler := products.NewHandler(productService)
 	router.Get("/products", productsHandler.ListProducts)
 	router.Get("/products/{id}", productsHandler.GetProduct)
+	router.Post("/products", productsHandler.CreateProduct)
 
 	return router
 }

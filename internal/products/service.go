@@ -9,6 +9,7 @@ import (
 type Service interface {
 	ListProducts(ctx context.Context) ([]repo.Product, error)
 	FindProductByID(ctx context.Context, id int64) (repo.Product, error)
+	CreateProduct(ctx context.Context, arg repo.CreateProductParams) (int64, error)
 }
 
 type service struct {
@@ -35,4 +36,13 @@ func (s *service) FindProductByID(ctx context.Context, id int64) (repo.Product, 
 	}
 
 	return product, nil
+}
+
+func (s *service) CreateProduct(ctx context.Context, arg repo.CreateProductParams) (int64, error) {
+	id, err := s.repo.CreateProduct(ctx, arg)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
