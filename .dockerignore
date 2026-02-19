@@ -18,3 +18,4 @@ sqlc.yml
 Taskfile.yml
 atlas.hcl
 internal/adapters/migrations/schema.hcl
+docker-compose.yml

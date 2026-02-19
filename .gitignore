@@ -26,3 +26,5 @@ go.sum
 .DS_Store
 Thumbs.db
 .env
+
+docker-compose.yml

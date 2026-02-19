@@ -23,7 +23,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/go-lang
+          images: ${{ varibles.DOCKER_USERNAME }}/go-lang
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -40,7 +40,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: ${{ varibles.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build & Push
