@@ -91,7 +91,9 @@ func (app *API) healthCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok"))
+	if _, err := w.Write([]byte("ok")); err != nil {
+		slog.Error("Failed to write health check response", "error", err)
+	}
 }
 
 type config struct {
