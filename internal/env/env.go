@@ -1,6 +1,14 @@
 package env
 
-import "os"
+import (
+	"os"
+
+	"github.com/joho/godotenv"
+)
+
+func init() {
+	_ = godotenv.Load()
+}
 
 func GetString(key, fallback string) string {
 	if value := os.Getenv(key); value != "" {

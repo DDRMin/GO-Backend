@@ -22,7 +22,7 @@ func main() {
 	config := config{
 		addr: env.GetString("ADDR", "0.0.0.0:8080"),
 		db: dbConfig{
-			dbUrl: env.GetString("DB_URL", "postgres://user:password@localhost:5432/mydb?sslmode=disable"),
+			dbUrl: env.GetString("DB_URL", "postgres://user:password@localhst:5432/mydb?sslmode=disable"),
 		},
 	}
 
