@@ -4,7 +4,7 @@ Minimal Go HTTP API starter with Chi, PostgreSQL, Atlas migrations, and sqlc cod
 
 ## Overview
 
-This project is a lightweight API server built with Go 1.25.5, designed to be simple yet robust. Key features include:
+This project is a lightweight API server built with Go 1.26, designed to be simple yet robust. Key features include:
 
 -   **Router**: `chi` v5 for fast and composable routing.
 -   **Database**: `pgx` v5 for high-performance PostgreSQL driver and connection pooling.
@@ -26,6 +26,7 @@ This project is a lightweight API server built with Go 1.25.5, designed to be si
 │   │   └── sqlc/       # sqlc generated Go code and SQL queries
 │   ├── env/            # Environment variable utilities
 │   ├── json/           # JSON response helpers
+│   ├── orders/         # Domain logic for order management
 │   └── products/       # Domain logic for product management
 ├── atlas.hcl           # Atlas configuration file
 ├── sqlc.yml            # sqlc configuration file
@@ -36,7 +37,7 @@ This project is a lightweight API server built with Go 1.25.5, designed to be si
 
 Ensure you have the following installed:
 
--   **Go**: 1.25.5 or higher
+-   **Go**: 1.26 or higher
 -   **PostgreSQL**: 16 or higher (or Docker)
 -   **Atlas CLI**: For managing database schemas
     -   MacOS: `brew install ariga/tap/atlas`
@@ -120,10 +121,13 @@ If you add or modify SQL queries in `internal/adapters/sqlc/queries.sql`:
 
 ## API Endpoints
 
-| Method | Endpoint    | Description                                      |
-| :----- | :---------- | :----------------------------------------------- |
-| `GET`  | `/health`   | Health check. Returns 200 OK or 503 Unavailable. |
-| `GET`  | `/products` | Retreives a list of products.                    |
+| Method | Endpoint         | Description                                      |
+| :----- | :--------------- | :----------------------------------------------- |
+| `GET`  | `/health`        | Health check. Returns 200 OK or 503 Unavailable. |
+| `GET`  | `/products`      | Retrieves a list of products.                    |
+| `GET`  | `/products/{id}` | Retrieves a single product by ID.                |
+| `POST` | `/products`      | Creates a new product.                           |
+| `POST` | `/orders`        | Creates a new order with line items.             |
 
 ## Configuration
 
@@ -132,4 +136,4 @@ The application is configured via environment variables:
 | Variable | Description                                             | Default     |
 | :------- | :------------------------------------------------------ | :---------- |
 | `DB_URL` | PostgreSQL connection string                            | (Required)  |
-| `PORT`   | Port for the HTTP server (if configured in `config.go`) | `:8080`     |
+| `PORT`   | Port for the HTTP server (if configured in `config.go`) | `127.0.0.1:8080` |
