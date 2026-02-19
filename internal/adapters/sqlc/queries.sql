@@ -18,4 +18,10 @@ VALUES ($1, $2, $3);
 -- name: CreateOrder :one
 INSERT INTO orders (user_id, created_at)
 VALUES ($1, NOW())
-RETURNING id; 
+RETURNING id;
+
+-- name: ReduceProductQuantity :one
+UPDATE products
+SET quantity = quantity - $2
+WHERE id = $1 AND quantity >= $2
+RETURNING quantity;

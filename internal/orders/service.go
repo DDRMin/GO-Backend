@@ -30,7 +30,15 @@ func (s *service) CreateOrder(ctx context.Context, req CreateOrderRequest) (int6
 	}
 
 	for _, item := range req.Items {
-		err := s.repo.CreateOrderItem(ctx, repo.CreateOrderItemParams{
+		_, err := s.repo.ReduceProductQuantity(ctx, repo.ReduceProductQuantityParams{
+			ID:       item.ProductID,
+			Quantity: item.Quantity,
+		})
+		if err != nil {
+			return 0, fmt.Errorf("insufficient stock for product %d: %w", item.ProductID, err)
+		}
+
+		err = s.repo.CreateOrderItem(ctx, repo.CreateOrderItemParams{
 			OrderID:   orderID,
 			ProductID: item.ProductID,
 			Quantity:  item.Quantity,
