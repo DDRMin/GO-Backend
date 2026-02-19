@@ -12,6 +12,6 @@ func Write(w http.ResponseWriter, status int, data any) {
 
 }
 
-func Read(r *http.Request, dst any, ) error {
+func Read(r *http.Request, dst any) error {
 	return json.NewDecoder(r.Body).Decode(dst)
 }

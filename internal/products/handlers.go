@@ -54,11 +54,7 @@ func (h *handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Name     string  `json:"name"`
-		Price    float64 `json:"price"`
-		Quantity int32   `json:"quantity"`
-	}
+	var req createProduct
 
 	if err := json.Read(r, &req); err != nil {
 		log.Println(err)
