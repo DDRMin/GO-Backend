@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:latest
+    restart: unless-stopped
+    container_name: DB
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d mydb" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    image: ddrmin/go-lang:latest
+    restart: unless-stopped
+    container_name: backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: postgres://user:password@db:5432/mydb?sslmode=disable
+      ADDR: ${ADDR}
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
