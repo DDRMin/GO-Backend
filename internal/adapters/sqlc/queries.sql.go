@@ -25,18 +25,18 @@ func (q *Queries) CreateOrder(ctx context.Context, userID int64) (int64, error) 
 }
 
 const createOrderItem = `-- name: CreateOrderItem :exec
-INSERT INTO order_items (order_id, product_id, quantity)
+INSERT INTO order_items (order_id, product_ids, quantity)
 VALUES ($1, $2, $3)
 `
 
 type CreateOrderItemParams struct {
-	OrderID   int64 `json:"order_id"`
-	ProductID int64 `json:"product_id"`
-	Quantity  int32 `json:"quantity"`
+	OrderID    int64   `json:"order_id"`
+	ProductIds []int64 `json:"product_ids"`
+	Quantity   int32   `json:"quantity"`
 }
 
 func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) error {
-	_, err := q.db.Exec(ctx, createOrderItem, arg.OrderID, arg.ProductID, arg.Quantity)
+	_, err := q.db.Exec(ctx, createOrderItem, arg.OrderID, arg.ProductIds, arg.Quantity)
 	return err
 }
 

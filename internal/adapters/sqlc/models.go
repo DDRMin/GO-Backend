@@ -15,10 +15,10 @@ type Order struct {
 }
 
 type OrderItem struct {
-	ID        int64 `json:"id"`
-	OrderID   int64 `json:"order_id"`
-	ProductID int64 `json:"product_id"`
-	Quantity  int32 `json:"quantity"`
+	ID         int64   `json:"id"`
+	OrderID    int64   `json:"order_id"`
+	Quantity   int32   `json:"quantity"`
+	ProductIds []int64 `json:"product_ids"`
 }
 
 type Product struct {
