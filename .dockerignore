@@ -1,0 +1,16 @@
+.git
+.github
+.env
+.vscode
+.idea
+*.exe
+*.dll
+*.test
+*.out
+vendor/
+Thumbs.db
+.DS_Store
+README.md
+sqlc.yml
+Taskfile.yml
+atlas.hcl

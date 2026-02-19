@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/DDRMin/GO-Backend/internal/adapters/migrations"
 	"github.com/DDRMin/GO-Backend/internal/env"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -19,7 +20,7 @@ func main() {
 	slog.SetDefault(logger)
 
 	config := config{
-		addr: "127.0.0.1:8080",
+		addr: env.GetString("ADDR", "0.0.0.0:8080"),
 		db: dbConfig{
 			dbUrl: env.GetString("DB_URL", "postgres://user:password@localhost:5432/mydb?sslmode=disable"),
 		},
@@ -38,6 +39,12 @@ func main() {
 	}
 
 	slog.Info("Connected to database", "url", config.db.dbUrl)
+
+	if _, err := pool.Exec(ctx, migrations.Schema()); err != nil {
+		slog.Error("Failed to run migrations", "error", err)
+		os.Exit(1)
+	}
+	slog.Info("Migrations applied successfully")
 
 	api := API{
 		config: config,
