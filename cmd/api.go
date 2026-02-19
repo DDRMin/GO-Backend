@@ -8,6 +8,7 @@ import (
 	"time"
 
 	repo "github.com/DDRMin/GO-Backend/internal/adapters/sqlc"
+	"github.com/DDRMin/GO-Backend/internal/orders"
 	"github.com/DDRMin/GO-Backend/internal/products"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -36,6 +37,10 @@ func (app *API) mount() http.Handler {
 	router.Get("/products", productsHandler.ListProducts)
 	router.Get("/products/{id}", productsHandler.GetProduct)
 	router.Post("/products", productsHandler.CreateProduct)
+
+	orderService := orders.NewService(repo.New(app.pool))
+	ordersHandler := orders.NewHandler(orderService)
+	router.Post("/orders", ordersHandler.CreateOrder)
 
 	return router
 }

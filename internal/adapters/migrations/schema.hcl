@@ -82,8 +82,8 @@ table "order_items" {
     null = false
   }
 
-  column "product_ids" {
-    type = sql("bigint[]")
+  column "product_id" {
+    type = bigint
     null = false
   }
 
@@ -100,6 +100,12 @@ table "order_items" {
   foreign_key "order_items_order_id_fkey" {
     columns     = [column.order_id]
     ref_columns = [table.orders.column.id]
+    on_delete   = "CASCADE"
+  }
+
+  foreign_key "order_items_product_id_fkey" {
+    columns     = [column.product_id]
+    ref_columns = [table.products.column.id]
     on_delete   = "CASCADE"
   }
 }

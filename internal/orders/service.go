@@ -2,12 +2,13 @@ package orders
 
 import (
 	"context"
+	"fmt"
 
 	repo "github.com/DDRMin/GO-Backend/internal/adapters/sqlc"
 )
 
 type Service interface {
-	CreateOrder(ctx context.Context, arg repo.Querier) (int64, error)
+	CreateOrder(ctx context.Context, req CreateOrderRequest) (int64, error)
 }
 
 type service struct {
@@ -18,12 +19,26 @@ func NewService(repo repo.Querier) Service {
 	return &service{repo: repo}
 }
 
-func (s *service) CreateOrder(ctx context.Context, arg repo.Querier) (int64, error) {
-	orderID, err := s.repo.CreateOrder(ctx, 1) // Assuming userID is 1 for demonstration purposes
+func (s *service) CreateOrder(ctx context.Context, req CreateOrderRequest) (int64, error) {
+	if len(req.Items) == 0 {
+		return 0, fmt.Errorf("order must have at least one item")
+	}
+
+	orderID, err := s.repo.CreateOrder(ctx, req.UserID)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to create order: %w", err)
+	}
+
+	for _, item := range req.Items {
+		err := s.repo.CreateOrderItem(ctx, repo.CreateOrderItemParams{
+			OrderID:   orderID,
+			ProductID: item.ProductID,
+			Quantity:  item.Quantity,
+		})
+		if err != nil {
+			return 0, fmt.Errorf("failed to create order item: %w", err)
+		}
 	}
 
 	return orderID, nil
 }
-
