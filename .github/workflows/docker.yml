@@ -23,13 +23,15 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/go-backend
+          images: ${{ secrets.DOCKER_USERNAME }}/go-lang
           tags: |
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha,prefix=
+            type=raw,value=latest
+
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

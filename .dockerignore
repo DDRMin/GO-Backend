@@ -7,10 +7,14 @@
 *.dll
 *.test
 *.out
+*.md
 vendor/
 Thumbs.db
 .DS_Store
-README.md
+.gitignore
+.dockerignore
+Dockerfile
 sqlc.yml
 Taskfile.yml
 atlas.hcl
+internal/adapters/migrations/schema.hcl
